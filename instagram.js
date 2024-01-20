@@ -14,10 +14,28 @@ async function getImages(driver) {
 }
 
 async function scrollDown(driver) {
-  await driver.sleep(5000)
+  await driver.sleep(4000)
 
   await driver.executeScript('window.scrollTo(0, document.body.scrollHeight)');
-  await driver.sleep(5000);
+  await driver.sleep(4000);
+
+  let numberOfPosts = await driver.findElement(By.tagName('ul')).getAttribute('innerText');
+  if(cdnLinks.length !== numberOfPosts.split(" ")[0]){
+    do{
+
+      await scrollDown(driver);
+      await getImages(driver)
+
+      try{
+        let loginWindow = driver.findElement(By.className('xzkaem6'))
+        if(loginWindow){
+          driver.executeScript(`document.querySelector('.xzkaem6').hidden = true`)
+        }
+      } catch{}
+       
+
+    } while (cdnLinks.length !== numberOfPosts.split(" ")[0] - 1)
+  }
 }
 
 async function fetchInstagramPage() {
@@ -29,19 +47,16 @@ async function fetchInstagramPage() {
 
     await driver.wait(until.elementLocated(By.className('_aagu')), 30000);
 
-      getImages(driver);
-
       let endLoginBanner = await driver.findElement(By.className('_abn5 '));
       endLoginBanner.click();
 
       let showMorePosts = await driver.findElement(By.className('_any9'));
       showMorePosts.click();
 
-      scrollDown(driver);
-      await getImages(driver);
-
       await scrollDown(driver);
       await getImages(driver);
+      
+
 
   } finally {
     await driver.quit();
