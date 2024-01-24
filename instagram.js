@@ -22,17 +22,23 @@ async function scrollDown(driver) {
   let numberOfPosts = await driver.findElement(By.tagName('ul')).getAttribute('innerText');
   if(cdnLinks.length !== numberOfPosts.split(" ")[0]){
     do{
+      
+      driver.executeScript(`let dragEvent = null`);
+      
+      try {
+        let element = await driver.findElement(By.className('xzkaem6'));
+        if (element) {
+          console.log('found it')
+          await driver.executeScript(`document.querySelectorAll("div")[491].hidden = true;`);
+        } else {
+          console.log("Element not found");
+        }
+      } catch (error) {
+        console.log("Error finding element:", error.message);
+      }
 
       await scrollDown(driver);
-      await getImages(driver)
-
-      try{
-        let loginWindow = driver.findElement(By.className('xzkaem6'))
-        if(loginWindow){
-          driver.executeScript(`document.querySelector('.xzkaem6').hidden = true`)
-        }
-      } catch{}
-       
+      await getImages(driver);
 
     } while (cdnLinks.length !== numberOfPosts.split(" ")[0] - 1)
   }
