@@ -4,6 +4,23 @@ import { parse } from 'node-html-parser';
 let cdnLinks = new Set();
 let numberOfPosts = 0;
 
+const progress = (current,max) => {
+  const percentage = Math.floor((current / max) * 100)
+  const numberOfHashes = (percentage / 5)
+  let msg = "";
+  for(let i=0;i<numberOfHashes;i++){
+      msg += "#";
+  }
+  msg = msg.split('').join(" ");
+  for(let i=msg.length;i<40;i++){
+      msg += " ";
+  }
+  msg = `[ ${msg} ] ${percentage}%`;
+  return msg
+}
+
+
+
 async function getImages(driver) {
   let images = await driver.findElement(By.tagName('article')).getAttribute('outerHTML');
   let document = parse(images)
@@ -38,7 +55,10 @@ async function scrollDown(driver) {
       } catch (error){
         // console.log("Error finding element:", error.message);
       }
-      console.log( {fetched:cdnLinks.size,numberOfPosts });
+      console.clear();
+      console.log("\x1b[32m");
+      console.log(progress(cdnLinks.size,numberOfPosts));
+      console.log("\x1b[37m");
 
       await getImages(driver);
       await scrollDown(driver);
@@ -47,17 +67,21 @@ async function scrollDown(driver) {
   }
 }
 
+
+
 async function fetchInstagramPage() {
 
   const driver = await new Builder().forBrowser('chrome').build();
 
 
 
+
+
   try {
   // Loading Cookie
-    // await driver.get('https://www.instagram.com/');
-    // await driver.manage().addCookie({name:"sessionid",value:"ADD YOU COOKIE"})
-    // await driver.navigate().refresh();
+    await driver.get('https://www.instagram.com/');
+    await driver.manage().addCookie({name:"sessionid",value:"45037221928%3A4DVvF5ynmDQ3DP%3A10%3AAYcA1ipXGhOx2Bcd57lwfHRDvdfGfC8KKxbS5mMQRQ"})
+    await driver.navigate().refresh();
 
     await driver.get('https://www.instagram.com/saraya/');
     await driver.wait(until.elementLocated(By.className('_aagu')), 30000);
