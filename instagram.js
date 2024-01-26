@@ -80,7 +80,7 @@ async function fetchInstagramPage() {
   try {
   // Loading Cookie
     await driver.get('https://www.instagram.com/');
-    await driver.manage().addCookie({name:"sessionid",value:"45037221928%3A4DVvF5ynmDQ3DP%3A10%3AAYcA1ipXGhOx2Bcd57lwfHRDvdfGfC8KKxbS5mMQRQ"})
+    await driver.manage().addCookie({name:"sessionid",value:"ADD YOUR COOKIE HERE"})
     await driver.navigate().refresh();
 
     await driver.get('https://www.instagram.com/saraya/');
