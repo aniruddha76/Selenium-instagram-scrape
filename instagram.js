@@ -2,6 +2,7 @@ import { Builder, By, Condition, Key, until } from 'selenium-webdriver';
 import { parse } from 'node-html-parser';
 
 let cdnLinks = new Set();
+let numberOfPosts = 0;
 
 async function getImages(driver) {
   let images = await driver.findElement(By.tagName('article')).getAttribute('outerHTML');
@@ -19,8 +20,8 @@ async function scrollDown(driver) {
   await driver.executeScript('window.scrollTo(0, document.body.scrollHeight)');
   await driver.sleep(4000);
 
-  let numberOfPosts = await driver.findElement(By.tagName('ul')).getAttribute('innerText');
-  if (cdnLinks.length !== numberOfPosts.split(" ")[0]) {
+  // let numberOfPosts = await driver.findElement(By.tagName('ul')).getAttribute('innerText');
+  if (cdnLinks.size < numberOfPosts) {
     do {
 
       driver.executeScript(`let dragEvent = null`);
@@ -34,14 +35,15 @@ async function scrollDown(driver) {
           await getImages(driver);
         }
 
-      } catch {
+      } catch (error){
         // console.log("Error finding element:", error.message);
       }
+      console.log( {fetched:cdnLinks.size,numberOfPosts });
 
-      await scrollDown(driver);
       await getImages(driver);
+      await scrollDown(driver);
 
-    } while (cdnLinks.length !== numberOfPosts.split(" ")[0] - 1)
+    } while (cdnLinks.size < numberOfPosts)
   }
 }
 
@@ -49,9 +51,15 @@ async function fetchInstagramPage() {
 
   const driver = await new Builder().forBrowser('chrome').build();
 
-  try {
-    await driver.get('https://www.instagram.com/saraya/');
 
+
+  try {
+  // Loading Cookie
+    // await driver.get('https://www.instagram.com/');
+    // await driver.manage().addCookie({name:"sessionid",value:"ADD YOU COOKIE"})
+    // await driver.navigate().refresh();
+
+    await driver.get('https://www.instagram.com/saraya/');
     await driver.wait(until.elementLocated(By.className('_aagu')), 30000);
 
     let endLoginBanner = await driver.findElement(By.className('_abn5 '));
@@ -60,12 +68,19 @@ async function fetchInstagramPage() {
     let showMorePosts = await driver.findElement(By.className('_any9'));
     showMorePosts.click();
 
+  }
+  catch(error){
+    console.log(error.message)
+  }
+
+  numberOfPosts = (await driver.findElement(By.tagName('ul')).getAttribute('innerText')).split(" ")[0] - 1;
+
+  try {
     await scrollDown(driver);
     await getImages(driver);
-
-
-
-  } finally {
+  } catch (error) {
+    console.log(error)
+  }   finally {
     await driver.quit();
     return cdnLinks
   }
