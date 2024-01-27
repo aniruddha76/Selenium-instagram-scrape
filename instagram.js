@@ -2,6 +2,7 @@ import { Builder, By, Condition, Key, until } from 'selenium-webdriver';
 import { parse } from 'node-html-parser';
 
 let cdnLinks = new Set();
+let numberOfPosts;
 
 async function getImages(driver) {
   let images = await driver.findElement(By.tagName('article')).getAttribute('outerHTML');
@@ -14,34 +15,34 @@ async function getImages(driver) {
 }
 
 async function scrollDown(driver) {
-  await driver.sleep(4000)
 
+  await driver.sleep(4000);
   await driver.executeScript('window.scrollTo(0, document.body.scrollHeight)');
   await driver.sleep(4000);
 
-  let numberOfPosts = await driver.findElement(By.tagName('ul')).getAttribute('innerText');
-  if (cdnLinks.length !== numberOfPosts.split(" ")[0]) {
+  if (cdnLinks.length !== numberOfPosts) {
     do {
 
       driver.executeScript(`let dragEvent = null`);
 
       try {
         let element = await driver.findElement(By.className('xzkaem6'));
+
         if (element) {
-          scrollDown(driver);
-          
-          driver.executeScript(`document.querySelector(".x1n2onr6.xzkaem6").style.display = "none"`);
+          driver.executeScript(`document.querySelector(".x1n2onr6.xzkaem6").remove()`);
+
+          await scrollDown(driver);
           await getImages(driver);
         }
 
-      } catch {
-        // console.log("Error finding element:", error.message);
+      } catch(error) {
+        console.log("Error finding element:", error.message);
       }
 
       await scrollDown(driver);
       await getImages(driver);
 
-    } while (cdnLinks.length !== numberOfPosts.split(" ")[0] - 1)
+    } while (cdnLinks.length !== numberOfPosts - 1)
   }
 }
 
@@ -60,18 +61,20 @@ async function fetchInstagramPage() {
     let showMorePosts = await driver.findElement(By.className('_any9'));
     showMorePosts.click();
 
+    let posts = await driver.findElement(By.tagName('ul')).getAttribute('innerText');
+    numberOfPosts = posts.split(" ")[0];
+
     await scrollDown(driver);
     await getImages(driver);
 
-
-
   } finally {
     await driver.quit();
-    return cdnLinks
   }
+  
+  console.log(numberOfPosts)
+  return cdnLinks;
 }
 
 fetchInstagramPage().then(html => {
   console.log(html)
 });
-
