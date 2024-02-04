@@ -13,30 +13,24 @@ async function getImages(driver) {
     let links = imgElement.getAttribute('src');
     cdnLinks.add(links);
   })
-
-  console.log("Total Links: " + cdnLinks.size)
 }
 
 async function scrollDown(driver) {
 
   await driver.sleep(3000);
-  await driver.executeScript('window.scrollTo(0, document.body.scrollHeight)');
+  await driver.executeScript('window.scrollTo(0, document.body.scrollHeight)') || await driver.executeScript('document.querySelector("footer").scrollIntoView()');
   await getImages(driver);
   await driver.sleep(3000);
 
   if (cdnLinks.size < totalPosts) {
-    console.log("total posts are: " + totalPosts)
-
     try {
       let element = await driver.findElement(By.className('xzkaem6'));
 
       if (element) {
-        let someElement = await driver.executeScript(`document.querySelector("footer").scrollIntoView()`);
         await driver.executeScript(`document.querySelector(".x1n2onr6.xzkaem6").remove()`);
+        await driver.executeScript(`document.querySelector("footer").scrollIntoView()`);
       }
-    } catch (error) {
-      console.log("Error finding element:", error.message);
-    }
+    } catch (error) {}
 
     await getImages(driver);
     await driver.sleep(1000);
@@ -71,7 +65,6 @@ async function fetchInstagramPage() {
     await driver.quit();
   }
 
-  console.log(totalPosts)
   return cdnLinks;
 }
 
