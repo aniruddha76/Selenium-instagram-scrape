@@ -5,6 +5,12 @@ let cdnLinks = new Set();
 let numberOfPosts;
 let totalPosts;
 
+async function progressBar(min, max){
+  console.clear();
+  let progress = Math.floor((min.size / max) * 100);
+  console.log(progress + "%")
+}
+
 async function getImages(driver) {
   let images = await driver.findElement(By.tagName('article')).getAttribute('outerHTML');
   let document = parse(images)
@@ -34,8 +40,13 @@ async function scrollDown(driver) {
 
     await getImages(driver);
     await driver.sleep(1000);
+   
+    for (let i=0; i<=totalPosts; i++){
+    await progressBar(cdnLinks, totalPosts)
+    }
 
     await scrollDown(driver);
+
   }
 }
 
@@ -58,10 +69,12 @@ async function fetchInstagramPage() {
     numberOfPosts = posts.split(" ")[0];
     totalPosts = +numberOfPosts;
 
+    await progressBar(cdnLinks, totalPosts);
     await scrollDown(driver);
     await getImages(driver);
 
   } finally {
+    progressBar(cdnLinks, totalPosts);
     await driver.quit();
   }
 
