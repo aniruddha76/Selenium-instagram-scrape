@@ -7,50 +7,43 @@ let totalPosts;
 
 async function getImages(driver) {
   let images = await driver.findElement(By.tagName('article')).getAttribute('outerHTML');
-  let document = await parse(images)
+  let document = parse(images)
 
-  await document.querySelectorAll('img').map(imgElement => {
+  document.querySelectorAll('img').map(imgElement => {
     let links = imgElement.getAttribute('src');
     cdnLinks.add(links);
   })
 
-  console.log(cdnLinks.size)
+  console.log("Total Links: " + cdnLinks.size)
 }
 
 async function scrollDown(driver) {
 
-  await driver.sleep(4000);
+  await driver.sleep(3000);
   await driver.executeScript('window.scrollTo(0, document.body.scrollHeight)');
   await getImages(driver);
-  await driver.sleep(4000);
+  await driver.sleep(3000);
 
-  if (cdnLinks.length !== totalPosts) {
-    console.log(totalPosts)
-    // do {
+  if (cdnLinks.size < totalPosts) {
+    console.log("total posts are: " + totalPosts)
 
-    //   driver.executeScript(`let dragEvent = null`);
+    try {
+      let element = await driver.findElement(By.className('xzkaem6'));
 
-    //   try {
-    //     let element = await driver.findElement(By.className('xzkaem6'));
+      if (element) {
+        let someElement = await driver.executeScript(`document.querySelector("footer").scrollIntoView()`);
+        await driver.executeScript(`document.querySelector(".x1n2onr6.xzkaem6").remove()`);
+      }
+    } catch (error) {
+      console.log("Error finding element:", error.message);
+    }
 
-    //     if (element) {
-    //       driver.executeScript(`document.querySelector(".x1n2onr6.xzkaem6").remove()`);
+    await getImages(driver);
+    await driver.sleep(1000);
 
-    //       await scrollDown(driver);
-          await getImages(driver);
-          await driver.sleep(4000);
-        // }
-
-      // } catch(error) {
-      //   console.log("Error finding element:", error.message);
-      // }
-  
-      await scrollDown(driver);
-      // await getImages(driver);
-
-    // } while (cdnLinks.length !== numberOfPosts - 1)
+    await scrollDown(driver);
   }
-  }
+}
 
 async function fetchInstagramPage() {
 
@@ -61,7 +54,7 @@ async function fetchInstagramPage() {
 
     await driver.wait(until.elementLocated(By.className('_aagu')), 30000);
 
-    let endLoginBanner = await driver.findElement(By.className('_abn5 '));
+    let endLoginBanner = await driver.findElement(By.className('_abn5'));
     endLoginBanner.click();
 
     let showMorePosts = await driver.findElement(By.className('_any9'));
@@ -69,9 +62,7 @@ async function fetchInstagramPage() {
 
     let posts = await driver.findElement(By.tagName('ul')).getAttribute('innerText');
     numberOfPosts = posts.split(" ")[0];
-    totalPosts = Number(numberOfPosts);
-
-    await driver.executeScript(`document.querySelectorAll("link").forEach(item => {if(item.rel != "stylesheet"){console.log(item); item.remove()}})`);
+    totalPosts = +numberOfPosts;
 
     await scrollDown(driver);
     await getImages(driver);
@@ -79,7 +70,7 @@ async function fetchInstagramPage() {
   } finally {
     await driver.quit();
   }
-  
+
   console.log(totalPosts)
   return cdnLinks;
 }
