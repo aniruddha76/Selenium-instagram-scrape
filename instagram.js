@@ -1,14 +1,25 @@
-import { Builder, By, Condition, Key, until } from 'selenium-webdriver';
+import { Builder, By, Condition, Key, promise, until } from 'selenium-webdriver';
 import { parse } from 'node-html-parser';
+import readline from 'readline';
+import { resolve } from 'dns/promises';
+import { rejects } from 'assert';
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+})
 
 let cdnLinks = new Set();
 let numberOfPosts;
 let totalPosts;
 
-async function progressBar(min, max){
+async function progressBar(min, max) {
   console.clear();
   let progress = Math.floor((min.size / max) * 100);
-  console.log(progress + "%")
+  console.log("Scraping posts: " + progress + "%")
+  if (+progress === 100) {
+    console.log("Scraping complete!!")
+  }
 }
 
 async function getImages(driver) {
@@ -26,6 +37,7 @@ async function scrollDown(driver) {
   await driver.sleep(3000);
   await driver.executeScript('window.scrollTo(0, document.body.scrollHeight)') || await driver.executeScript('document.querySelector("footer").scrollIntoView()');
   await getImages(driver);
+
   await driver.sleep(3000);
 
   if (cdnLinks.size < totalPosts) {
@@ -36,14 +48,9 @@ async function scrollDown(driver) {
         await driver.executeScript(`document.querySelector(".x1n2onr6.xzkaem6").remove()`);
         await driver.executeScript(`document.querySelector("footer").scrollIntoView()`);
       }
-    } catch (error) {}
+    } catch (error) { }
 
-    await getImages(driver);
-    await driver.sleep(1000);
-   
-    for (let i=0; i<=totalPosts; i++){
-    await progressBar(cdnLinks, totalPosts)
-    }
+    await progressBar(cdnLinks, totalPosts);
 
     await scrollDown(driver);
 
@@ -78,7 +85,22 @@ async function fetchInstagramPage() {
     await driver.quit();
   }
 
-  return cdnLinks;
+  return new Promise((resolve, rejects) => {
+    rl.question("Do you want to doanload posts? type 'Yes/No'\n", (answer) => {
+      if (answer.toLowerCase() == 'yes') {
+        console.log("This feature is coming soon.. \n")
+        resolve(cdnLinks)
+      } else if (answer.toLowerCase() == 'no') {
+        console.log("Links: \n", cdnLinks)
+        resolve(cdnLinks)
+      } else {
+        console.log("Invalid input: Type yes or no!");
+        rejects("Invalid input")
+      }
+
+      rl.close();
+    });
+  })
 }
 
 fetchInstagramPage().then(html => {
