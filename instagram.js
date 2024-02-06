@@ -1,7 +1,7 @@
 import { Builder, By, Condition, Key, promise, until } from 'selenium-webdriver';
 import { parse } from 'node-html-parser';
 import readline from 'readline';
-import { resolve } from 'dns/promises';
+import { resolve } from 'path';
 import { rejects } from 'assert';
 
 const rl = readline.createInterface({
@@ -12,13 +12,16 @@ const rl = readline.createInterface({
 let cdnLinks = new Set();
 let numberOfPosts;
 let totalPosts;
+let instagramProfile;
+let userName;
 
 async function progressBar(min, max) {
   console.clear();
   let progress = Math.floor((min.size / max) * 100);
+  console.log("Profile:", userName)
   console.log("Scraping posts: " + progress + "%")
   if (+progress === 100) {
-    console.log("Scraping complete!!")
+    console.log("Scraping complete!!");
   }
 }
 
@@ -59,46 +62,41 @@ async function scrollDown(driver) {
 
 async function fetchInstagramPage() {
 
-  const driver = await new Builder().forBrowser('chrome').build();
-
-  try {
-    await driver.get('https://www.instagram.com/saraya/');
-
-    await driver.wait(until.elementLocated(By.className('_aagu')), 30000);
-
-    let endLoginBanner = await driver.findElement(By.className('_abn5'));
-    endLoginBanner.click();
-
-    let showMorePosts = await driver.findElement(By.className('_any9'));
-    showMorePosts.click();
-
-    let posts = await driver.findElement(By.tagName('ul')).getAttribute('innerText');
-    numberOfPosts = posts.split(" ")[0];
-    totalPosts = +numberOfPosts;
-
-    await progressBar(cdnLinks, totalPosts);
-    await scrollDown(driver);
-    await getImages(driver);
-
-  } finally {
-    progressBar(cdnLinks, totalPosts);
-    await driver.quit();
-  }
-
   return new Promise((resolve, rejects) => {
-    rl.question("Do you want to doanload posts? type 'Yes/No'\n", (answer) => {
-      if (answer.toLowerCase() == 'yes') {
-        console.log("This feature is coming soon.. \n")
-        resolve(cdnLinks)
-      } else if (answer.toLowerCase() == 'no') {
-        console.log("Links: \n", cdnLinks)
-        resolve(cdnLinks)
-      } else {
-        console.log("Invalid input: Type yes or no!");
-        rejects("Invalid input")
-      }
+    console.clear();
+    rl.question("Enter profile link: ", async (answer) => {
+      instagramProfile = answer;
 
       rl.close();
+
+      const driver = await new Builder().forBrowser('chrome').build();
+
+      try {
+        await driver.get(`${instagramProfile}`);
+
+        await driver.wait(until.elementLocated(By.className('_aagu')), 30000);
+
+        let endLoginBanner = await driver.findElement(By.className('_abn5'));
+        endLoginBanner.click();
+
+        let showMorePosts = await driver.findElement(By.className('_any9'));
+        showMorePosts.click();
+
+        let posts = await driver.findElement(By.tagName('ul')).getAttribute('innerText');
+        numberOfPosts = posts.split(" ")[0];
+        totalPosts = +numberOfPosts;
+
+        userName = await driver.findElement(By.className('xvs91rp')).getAttribute('innerText');
+
+        await progressBar(cdnLinks, totalPosts);
+        await scrollDown(driver);
+        await getImages(driver);
+
+        resolve(cdnLinks)
+      } finally {
+        progressBar(cdnLinks, totalPosts);
+        await driver.quit();
+      }
     });
   })
 }
