@@ -15,12 +15,11 @@ let totalPosts;
 let instagramProfile;
 let userName;
 
-async function progressBar(min, max) {
+async function progressBar(cdnLinks, totalPosts) {
   console.clear();
-  let progress = Math.floor((min.size / max) * 100);
-  console.log("Profile:", userName)
-  console.log("Scraping posts: " + progress + "%")
-  if (+progress === 100) {
+  console.log("Profile name:", userName, "\nTotal posts:", totalPosts);
+  console.log("Mining Status:", cdnLinks.size, "Posts extracted..")
+  if (cdnLinks.size == totalPosts) {
     console.log("Scraping complete!!");
   }
 }
@@ -64,8 +63,8 @@ async function fetchInstagramPage() {
 
   return new Promise((resolve, rejects) => {
     console.clear();
-    rl.question("Enter profile link: ", async (answer) => {
-      instagramProfile = answer;
+    rl.question("Enter Username: ", async (answer) => {
+      instagramProfile = "https://www.instagram.com/" + answer;
 
       rl.close();
 
