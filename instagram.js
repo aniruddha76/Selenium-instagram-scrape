@@ -35,10 +35,10 @@ async function getImages(driver) {
 }
 
 async function scrollDown(driver) {
-
+  
   await driver.sleep(3000);
-  await driver.executeScript('window.scrollTo(0, document.body.scrollHeight)') || await driver.executeScript('document.querySelector("footer").scrollIntoView()');
   await getImages(driver);
+  await driver.executeScript('window.scrollTo(0, document.body.scrollHeight)') || await driver.executeScript('document.querySelector("footer").scrollIntoView()');
 
   await driver.sleep(3000);
 
