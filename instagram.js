@@ -59,8 +59,6 @@ async function scrollDown(driver) {
     await progressBar(cdnLinks, totalPosts);
 
     await scrollDown(driver);
-  } else {
-    resolve(cdnLinks);
   }
 }
 
