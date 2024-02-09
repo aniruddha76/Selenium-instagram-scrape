@@ -1,8 +1,12 @@
 import { Builder, By, Condition, Key, promise, until } from 'selenium-webdriver';
 import { parse } from 'node-html-parser';
 import readline from 'readline';
+import chrome from 'selenium-webdriver/chrome.js';
 import { resolve } from 'path';
 import { rejects } from 'assert';
+
+let chromeOptions = new chrome.Options();
+chromeOptions.addArguments('--headless');
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -55,7 +59,8 @@ async function scrollDown(driver) {
     await progressBar(cdnLinks, totalPosts);
 
     await scrollDown(driver);
-
+  } else {
+    resolve(cdnLinks);
   }
 }
 
@@ -68,7 +73,7 @@ async function fetchInstagramPage() {
 
       rl.close();
 
-      const driver = await new Builder().forBrowser('chrome').build();
+      const driver = await new Builder().forBrowser('chrome').setChromeOptions(chromeOptions).build();
 
       try {
         await driver.get(`${instagramProfile}`);
@@ -91,7 +96,7 @@ async function fetchInstagramPage() {
         await scrollDown(driver);
         await getImages(driver);
 
-        resolve(cdnLinks)
+        resolve(cdnLinks);
       } finally {
         progressBar(cdnLinks, totalPosts);
         await driver.quit();
