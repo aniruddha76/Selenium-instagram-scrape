@@ -18,6 +18,7 @@ let numberOfPosts;
 let totalPosts;
 let instagramProfile;
 let userName;
+let loadingElement;
 
 async function progressBar(cdnLinks, totalPosts) {
   console.clear();
@@ -43,9 +44,9 @@ async function scrollDown(driver) {
   await driver.sleep(3000);
   await getImages(driver);
   await driver.executeScript('window.scrollTo(0, document.body.scrollHeight)') || await driver.executeScript('document.querySelector("footer").scrollIntoView()');
-
+  
   await driver.sleep(3000);
-
+  
   if (cdnLinks.size < totalPosts) {
     try {
       let element = await driver.findElement(By.className('xzkaem6'));
@@ -58,7 +59,12 @@ async function scrollDown(driver) {
 
     await progressBar(cdnLinks, totalPosts);
 
-    await scrollDown(driver);
+    loadingElement = await driver.findElements(By.className('_aanh'));
+    if(await loadingElement.length === 0){
+      return cdnLinks;
+    } else {
+      await scrollDown(driver);
+    }
   }
 }
 
