@@ -4,6 +4,8 @@ import readline from 'readline';
 import chrome from 'selenium-webdriver/chrome.js';
 import { resolve } from 'path';
 import { rejects } from 'assert';
+import fs from 'fs';
+import https from 'https';
 
 let chromeOptions = new chrome.Options();
 chromeOptions.addArguments('--headless');
@@ -40,13 +42,13 @@ async function getImages(driver) {
 }
 
 async function scrollDown(driver) {
-  
+
   await driver.sleep(3000);
   await getImages(driver);
   await driver.executeScript('window.scrollTo(0, document.body.scrollHeight)') || await driver.executeScript('document.querySelector("footer").scrollIntoView()');
-  
+
   await driver.sleep(3000);
-  
+
   if (cdnLinks.size < totalPosts) {
     try {
       let element = await driver.findElement(By.className('xzkaem6'));
@@ -60,7 +62,7 @@ async function scrollDown(driver) {
     await progressBar(cdnLinks, totalPosts);
 
     loadingElement = await driver.findElements(By.className('_aanh'));
-    if(await loadingElement.length === 0){
+    if (await loadingElement.length === 0) {
       return cdnLinks;
     } else {
       await scrollDown(driver);
@@ -99,6 +101,25 @@ async function fetchInstagramPage() {
         await progressBar(cdnLinks, totalPosts);
         await scrollDown(driver);
         await getImages(driver);
+
+        async function downloadPosts() {
+          const downloadFolderPath = "./download";
+          if (!fs.existsSync(downloadFolderPath)) {
+            fs.mkdirSync(downloadFolderPath);
+          }
+
+          for (let link of cdnLinks) {
+            async function download(url, path) {
+              let localPath = await fs.createWriteStream(path);
+
+              let request = await https.get(url, function (response) {
+                response.pipe(localPath);
+              })
+            }
+            await download(link, downloadFolderPath, Date.now() + ".jpg")
+          }
+        }
+        downloadPosts()
 
         resolve(cdnLinks);
       } finally {
