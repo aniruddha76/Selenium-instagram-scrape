@@ -116,7 +116,7 @@ async function fetchInstagramPage() {
                 response.pipe(localPath);
               })
             }
-            await download(link, downloadFolderPath + Date.now() + ".jpg")
+            await download(link, downloadFolderPath + Date.now() + ".jpeg")
           }
         }
         downloadPosts()
