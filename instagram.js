@@ -103,7 +103,7 @@ async function fetchInstagramPage() {
         await getImages(driver);
 
         async function downloadPosts() {
-          const downloadFolderPath = "./download";
+          const downloadFolderPath = `./${userName}` + "/";
           if (!fs.existsSync(downloadFolderPath)) {
             fs.mkdirSync(downloadFolderPath);
           }
@@ -116,7 +116,7 @@ async function fetchInstagramPage() {
                 response.pipe(localPath);
               })
             }
-            await download(link, downloadFolderPath, Date.now() + ".jpg")
+            await download(link, downloadFolderPath + Date.now() + ".jpg")
           }
         }
         downloadPosts()
