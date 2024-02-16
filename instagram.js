@@ -112,11 +112,11 @@ async function fetchInstagramPage() {
             async function download(url, path) {
               let localPath = await fs.createWriteStream(path);
 
-              let request = await https.get(url, function (response) {
-                response.pipe(localPath);
+              let request = await https.get(url, async function (response) {
+                await response.pipe(localPath);
               })
             }
-            await download(link, downloadFolderPath + Date.now() + ".jpeg")
+            await download(link, downloadFolderPath + Date.now() + ".jpg")
           }
         }
         downloadPosts()
