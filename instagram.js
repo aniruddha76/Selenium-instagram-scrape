@@ -2,8 +2,6 @@ import { Builder, By, Condition, Key, promise, until } from 'selenium-webdriver'
 import { parse } from 'node-html-parser';
 import readline from 'readline';
 import chrome from 'selenium-webdriver/chrome.js';
-import { resolve } from 'path';
-import { rejects } from 'assert';
 import fs from 'fs';
 import https from 'https';
 
